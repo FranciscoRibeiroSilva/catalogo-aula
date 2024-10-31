@@ -1,6 +1,7 @@
 package com.doravantesoft.catalago.services;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.doravantesoft.catalago.DTO.CategoryDTO;
 import com.doravantesoft.catalago.entities.Category;
 import com.doravantesoft.catalago.repositories.CategoryRepository;
+import com.doravantesoft.catalago.services.exceptions.EntityNotFoundException;
 
 @Service
 public class CategoryService {
@@ -32,6 +34,16 @@ public class CategoryService {
 		}
 		return listDto;
 		*/
+	}
+	
+	/**
+	 *Optional evita o trabalho com valores nulos
+	 */
+	@Transactional(readOnly = true)
+	public CategoryDTO findById(Long id) {
+		Optional<Category> obj = repository.findById(id);
+		Category entity = obj.orElseThrow(() -> new EntityNotFoundException("Entity not found"));
+		return new CategoryDTO(entity);
 	}
 
 }
