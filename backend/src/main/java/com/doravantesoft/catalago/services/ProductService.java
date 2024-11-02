@@ -9,8 +9,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.doravantesoft.catalago.DTO.CategoryDTO;
 import com.doravantesoft.catalago.DTO.ProductDTO;
+import com.doravantesoft.catalago.entities.Category;
 import com.doravantesoft.catalago.entities.Product;
+import com.doravantesoft.catalago.repositories.CategoryRepository;
 import com.doravantesoft.catalago.repositories.ProductRepository;
 import com.doravantesoft.catalago.services.exceptions.DatabaseException;
 import com.doravantesoft.catalago.services.exceptions.ResourceNotFoundException;
@@ -22,6 +25,8 @@ public class ProductService {
 	
 	@Autowired
 	private ProductRepository repository;
+	@Autowired
+	private CategoryRepository categoryRepository;
 	
 	@Transactional(readOnly = true)//ou faz tudo ou não faz nada (readOnly = true)
 	public Page<ProductDTO> findAllPaged(PageRequest pageRequest){
@@ -48,14 +53,14 @@ public class ProductService {
 	@Transactional(readOnly = true)
 	public ProductDTO findById(Long id) {
 		Optional<Product> obj = repository.findById(id);
-		Product entity = obj.orElseThrow(() -> new EntityNotFoundException("Entity not found"));
+		Product entity = obj.orElseThrow(() -> new ResourceNotFoundException("Entity not found"));
 		return new ProductDTO(entity, entity.getCategories());
 	}
 	
 	@Transactional
 	public ProductDTO insert(ProductDTO dto) {
 		Product entity = new Product();
-		//entity.setName(dto.getName());
+		copyDtoToEntity(dto, entity);
 		entity = repository.save(entity);
 		return new ProductDTO(entity);
 	}
@@ -64,7 +69,7 @@ public class ProductService {
 	public ProductDTO update(Long id, ProductDTO dto) {
 		try {
 			Product entity = repository.getReferenceById(id);
-			//entity.setName(dto.getName());
+			copyDtoToEntity(dto, entity);
 			entity = repository.save(entity);
 			return new ProductDTO(entity);			
 		}
@@ -72,6 +77,7 @@ public class ProductService {
 			throw new ResourceNotFoundException("id not found "+id);
 		}
 	}
+
 	//@Transactional(propagation = Propagation.SUPPORTS)
 	public void delete(Long id) {
 		if(!repository.existsById(id)) {
@@ -84,6 +90,20 @@ public class ProductService {
 			throw new DatabaseException("integrity violation");
 		}
 		
+	}
+	
+	private void copyDtoToEntity(ProductDTO dto, Product entity) {
+		entity.setName(dto.getName());
+		entity.setDescription(dto.getDescription());
+		entity.setDate(dto.getDate());
+		entity.setImgUrl(dto.getImgUrl());
+		entity.setPrice(dto.getPrice());
+		
+		entity.getCategories().clear();
+		for(CategoryDTO catDto: dto.getCategories()) {
+			Category category = categoryRepository.getOne(catDto.getId());
+			entity.getCategories().add(category);
+		}
 	}
 
 
