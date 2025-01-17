@@ -1,12 +1,15 @@
 package com.doravantesoft.catalago.entities;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
 
 @Entity
-public class Role {
+public class Role implements Serializable{
 
+	private static final long serialVersionUID = 1L;
+	
 	private Long id;
 	private String authority;
 	
