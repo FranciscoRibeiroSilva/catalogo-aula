@@ -1,11 +1,9 @@
-package com.doravantesoft.catalago;
+package com.doravantesoft.catalago.entities;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
-import com.doravantesoft.catalago.entities.Role;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
