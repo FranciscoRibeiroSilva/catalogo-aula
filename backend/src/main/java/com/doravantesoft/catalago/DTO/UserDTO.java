@@ -7,14 +7,23 @@ import java.util.Set;
 
 import com.doravantesoft.catalago.entities.User;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+
 public class UserDTO implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 
 	
 	private Long id;
+	
+	@NotEmpty(message = "Campo obrigatório")
 	private String firstName;
+	
+	@NotEmpty(message = "Campo obrigatório")
 	private String lastName;
+	
+	@Email(message = "Entrar com email válido")
 	private String email;
 	
 	Set<RoleDTO> roles = new HashSet<>();
