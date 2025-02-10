@@ -1,12 +1,16 @@
 package com.doravantesoft.catalago.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +20,7 @@ import com.doravantesoft.catalago.DTO.UserInsertDTO;
 import com.doravantesoft.catalago.DTO.UserUpdateDTO;
 import com.doravantesoft.catalago.entities.Role;
 import com.doravantesoft.catalago.entities.User;
+import com.doravantesoft.catalago.projections.UserDetailsProjection;
 import com.doravantesoft.catalago.repositories.RoleRepository;
 import com.doravantesoft.catalago.repositories.UserRepository;
 import com.doravantesoft.catalago.services.exceptions.DatabaseException;
@@ -24,10 +29,10 @@ import com.doravantesoft.catalago.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService{
 	
 	@Autowired
-	private BCryptPasswordEncoder passwordEncoder;
+	private PasswordEncoder passwordEncoder;
 	
 	@Autowired
 	private UserRepository repository;
@@ -111,6 +116,22 @@ public class UserService {
 			entity.getRoles().add(role);
 			//entity.getCategories().add(new Category (catDto.getId(), null));
 		}
+	}
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		List<UserDetailsProjection> result = repository.searchUserAndRolesbyEmail(username);
+		
+		if (result.size() == 0) {
+			throw new UsernameNotFoundException("User not found");
+		}
+		User user = new User();
+		user.setEmail(username);
+		user.setPassword(result.get(0).getPassword());
+		for (UserDetailsProjection projection : result) {
+			user.addRole(new Role(projection.getRoleId(), projection.getAuthority()));
+		}
+		return user;
 	}
 
 
