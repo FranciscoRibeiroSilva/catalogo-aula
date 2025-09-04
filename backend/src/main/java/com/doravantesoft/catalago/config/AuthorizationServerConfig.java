@@ -51,7 +51,6 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
-//Aula 99 29
 @Configuration
 public class AuthorizationServerConfig {
 
