@@ -40,6 +40,9 @@ public class UserService implements UserDetailsService{
 	@Autowired
 	private RoleRepository roleRepository;
 	
+	@Autowired
+	private AuthService authService;
+	
 	@Transactional(readOnly = true)//ou faz tudo ou não faz nada (readOnly = true)
 	public Page<UserDTO> findAllPaged(Pageable pageable){
 		Page <User> list = repository.findAll(pageable);
@@ -66,6 +69,12 @@ public class UserService implements UserDetailsService{
 	public UserDTO findById(Long id) {
 		Optional<User> obj = repository.findById(id);
 		User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Entity not found"));
+		return new UserDTO(entity);
+	}
+	
+	@Transactional(readOnly = true)
+	public UserDTO findMy() {
+		User entity = authService.authenticated();
 		return new UserDTO(entity);
 	}
 	
